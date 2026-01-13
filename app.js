@@ -1,163 +1,72 @@
-// =====================
-// SAFE BOOT
-// =====================
 document.addEventListener("DOMContentLoaded", () => {
-  console.log("app loaded");
 
-  // =====================
-  // CHECK DEPENDENCIES
-  // =====================
-  if (!window.supabase) {
-    console.error("supabase not loaded");
-    return;
-  }
+const supabase = window.supabase.createClient(
+  "https://TON_PROJET.supabase.co",
+  "TON_ANON_KEY"
+);
 
-  // =====================
-  // SUPABASE
-  // =====================
-const SUPABASE_URL = "https://zzxqftnarcpjkqiztuof.supabase.co";
-const SUPABASE_ANON_KEY = "sb_publishable_T76EtSvgz5oMzg2zW2cGkA_I1fX3DIO";
+let wallet = null;
 
-  const supabase = window.supabase.createClient(
-    SUPABASE_URL,
-    SUPABASE_ANON_KEY
-  );
+const connectBtn = document.getElementById("connectBtn");
+const publishBtn = document.getElementById("publishBtn");
+const usernameInput = document.getElementById("usernameInput");
+const statementInput = document.getElementById("statementInput");
+const feedEl = document.getElementById("feed");
+const statusEl = document.getElementById("status");
 
-  // =====================
-  // DOM ELEMENTS
-  // =====================
-  const connectBtn = document.getElementById("connectBtn");
-  const publishBtn = document.getElementById("publishBtn");
-  const statusEl = document.getElementById("status");
-  const statementInput = document.getElementById("statementInput");
-  const usernameBox = document.getElementById("usernameBox");
-  const usernameInput = document.getElementById("usernameInput");
+// CONNECT
+connectBtn.onclick = async () => {
+  const res = await window.solana.connect();
+  wallet = res.publicKey.toString();
+  connectBtn.innerText = "connected";
+  connectBtn.classList.add("disabled");
+  usernameInput.classList.remove("hidden");
+  publishBtn.classList.remove("disabled");
+};
 
-  if (!connectBtn) {
-    console.error("connectBtn not found");
-    return;
-  }
+// PUBLISH
+publishBtn.onclick = async () => {
+  const username = usernameInput.value.trim();
+  const content = statementInput.value.trim();
 
-  let wallet = null;
+  if (!username.startsWith("@") || !content) return;
 
-  // =====================
-  // CONNECT WALLET
-  // =====================
-  connectBtn.onclick = async () => {
-    console.log("connect clicked");
-
-    if (!window.solana) {
-      alert("no solana wallet detected");
-      return;
-    }
-
-    if (!window.solana.isPhantom) {
-      alert("phantom wallet required");
-      return;
-    }
-
-    try {
-      const res = await window.solana.connect({ onlyIfTrusted: false });
-      wallet = res.publicKey.toString();
-
-      connectBtn.innerText = "wallet connected";
-      connectBtn.classList.add("disabled");
-
-      usernameBox.classList.remove("hidden");
-      publishBtn.classList.remove("disabled");
-
-      statusEl.innerText = "wallet connected";
-
-    } catch (e) {
-      console.error(e);
-      statusEl.innerText = "connection cancelled";
-    }
-  };
-
-  // =====================
-  // PUBLISH
-  // =====================
-  publishBtn.onclick = async () => {
-    if (!wallet) {
-      statusEl.innerText = "connect wallet first";
-      return;
-    }
-
-    const text = statementInput.value.trim();
-    const username = usernameInput.value.trim();
-
-    if (!username.startsWith("@")) {
-      statusEl.innerText = "invalid username";
-      return;
-    }
-
-    if (!text) {
-      statusEl.innerText = "write a statement";
-      return;
-    }
-
-    try {
-      statusEl.innerText = "signing...";
-
-      const message = `statement:${text}\nwallet:${wallet}`;
-      const encoded = new TextEncoder().encode(message);
-      const signed = await window.solana.signMessage(encoded, "utf8");
-
-      const signatureBase64 = btoa(
-        String.fromCharCode(...signed.signature)
-      );
-
-      statusEl.innerText = "saving...";
-
-      await supabase.from("users").upsert({
-        wallet: wallet,
-        username: username
-      });
-
-      const { error } = await supabase.from("statements").insert({
-        user_wallet: wallet,
-        content: text,
-        signature: signatureBase64
-      });
-
-      if (error) throw error;
-
-      statusEl.innerText = "statement published";
-
-    } catch (err) {
-      console.error(err);
-      statusEl.innerText = "failed to publish";
-    }
-  };
-});
-
-  // =====================
-  // FEED
-  // =====================
-
-async function loadFeed() {
-  const { data, error } = await supabase
-    .from("statements")
-    .select("content, created_at, user_wallet")
-    .order("created_at", { ascending: false })
-    .limit(20);
-
-  if (error) return;
-
-  const feed = document.createElement("div");
-  feed.className = "feed";
-
-  data.forEach(s => {
-    const el = document.createElement("div");
-    el.className = "post";
-    el.innerHTML = `
-      <div class="post-content">${s.content}</div>
-      <div class="post-meta">${s.user_wallet.slice(0,6)}...</div>
-    `;
-    feed.appendChild(el);
+  await supabase.from("users").upsert({
+    wallet,
+    username
   });
 
-  document.querySelector(".app").appendChild(feed);
+  await supabase.from("statements").insert({
+    user_wallet: wallet,
+    content,
+    signature: "signed"
+  });
+
+  statementInput.value = "";
+  loadFeed();
+};
+
+// FEED
+async function loadFeed() {
+  const { data } = await supabase
+    .from("statements")
+    .select("content, created_at, users(username)")
+    .order("created_at", { ascending: false });
+
+  feedEl.innerHTML = "";
+
+  data.forEach(p => {
+    const div = document.createElement("div");
+    div.className = "post";
+    div.innerHTML = `
+      <a href="profile.html?u=${p.users.username}">${p.users.username}</a>
+      <p>${p.content}</p>
+      <small>${new Date(p.created_at).toLocaleString()}</small>
+    `;
+    feedEl.appendChild(div);
+  });
 }
 
 loadFeed();
+
+});

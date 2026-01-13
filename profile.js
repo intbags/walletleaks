@@ -16,33 +16,19 @@ async function loadProfile() {
     .eq("username", username)
     .single();
 
-  if (!user) return;
-
   const { data: posts } = await supabase
     .from("statements")
     .select("content, created_at")
-    .eq("user_wallet", user.wallet)
-    .order("created_at", { ascending: false });
+    .eq("user_wallet", user.wallet);
 
   const container = document.getElementById("posts");
+
   posts.forEach(p => {
-    const el = document.createElement("div");
-    el.className = "post";
-    el.innerText = p.content;
-    container.appendChild(el);
+    const div = document.createElement("div");
+    div.className = "post";
+    div.innerHTML = `<p>${p.content}</p>`;
+    container.appendChild(div);
   });
 }
 
 loadProfile();
-
-document.getElementById("followBtn").onclick = async () => {
-  const wallet = window.solana.publicKey.toString();
-
-  await supabase.from("follows").insert({
-    follower_wallet: wallet,
-    following_wallet: user.wallet
-  });
-
-  alert("followed");
-};
-

@@ -1,94 +1,48 @@
-* {
-  box-sizing: border-box;
-}
-
-html, body {
+body {
   margin: 0;
-  padding: 0;
   background: #0a0a0a;
   color: #fff;
-  font-family: Inter, system-ui, sans-serif;
-}
-
-.bg {
-  position: fixed;
-  inset: 0;
-  background:
-    radial-gradient(circle at 20% 20%, rgba(255,255,255,0.04), transparent 40%),
-    radial-gradient(circle at 80% 80%, rgba(255,255,255,0.03), transparent 40%);
+  font-family: system-ui;
 }
 
 .app {
-  position: relative;
-  min-height: 100vh;
-  padding: 40px 20px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-.top {
-  width: 100%;
-  max-width: 900px;
-  margin-bottom: 80px;
-}
-
-.logo {
-  opacity: 0.7;
-  font-weight: 600;
-}
-
-.hero {
-  text-align: center;
-  margin-bottom: 60px;
+  max-width: 480px;
+  margin: auto;
+  padding: 30px 20px;
 }
 
 .hero h1 {
-  font-size: 56px;
-  line-height: 1.05;
-  letter-spacing: -1.5px;
-  margin-bottom: 20px;
+  font-size: 42px;
+  margin-bottom: 10px;
 }
 
 .hero p {
   color: #aaa;
-  line-height: 1.6;
 }
 
 .card {
-  width: 100%;
-  max-width: 480px;
   background: #111;
-  border: 1px solid #1e1e1e;
-  border-radius: 20px;
-  padding: 30px;
+  padding: 20px;
+  border-radius: 16px;
+  margin-top: 30px;
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 10px;
 }
 
-input, textarea {
-  width: 100%;
-  background: #0c0c0c;
-  border: 1px solid #222;
-  border-radius: 12px;
-  padding: 14px;
+textarea, input {
+  background: #000;
+  border: 1px solid #333;
   color: #fff;
-  font-size: 14px;
-  outline: none;
-}
-
-textarea {
-  resize: none;
-  min-height: 80px;
+  padding: 10px;
+  border-radius: 10px;
 }
 
 button {
-  padding: 14px;
-  border-radius: 12px;
+  padding: 12px;
+  border-radius: 10px;
   border: none;
   cursor: pointer;
-  font-weight: 600;
 }
 
 button.disabled {
@@ -96,27 +50,27 @@ button.disabled {
   pointer-events: none;
 }
 
-#connectBtn {
-  background: #fff;
-  color: #000;
+.feed {
+  margin-top: 40px;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
 }
 
-#publishBtn {
-  background: #fff;
-  color: #000;
+.post {
+  background: #111;
+  border-radius: 14px;
+  padding: 15px;
 }
 
-.status {
-  font-size: 13px;
-  color: #888;
-  min-height: 18px;
+.post a {
+  color: #fff;
+  font-weight: bold;
+  text-decoration: none;
 }
 
-footer {
-  margin-top: auto;
-  padding: 30px;
-  font-size: 11px;
-  color: #666;
+.post small {
+  color: #777;
 }
 
 .hidden {
