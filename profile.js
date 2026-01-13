@@ -1,3 +1,4 @@
+document.addEventListener("DOMContentLoaded", () => {
 const supabase = window.supabase.createClient(
   "https://zzxqftnarcpjkqiztuof.supabase.co",
   "sb_publishable_T76EtSvgz5oMzg2zW2cGkA_I1fX3DIO"
@@ -109,45 +110,46 @@ async function loadProfile() {
   });
 }
 
-document.getElementById("followBtn").onclick = async () => {
-  if (!currentWallet) {
-    if (window.solana && window.solana.isPhantom) {
-      try {
-        const res = await window.solana.connect();
-        currentWallet = res.publicKey.toString();
-        loadProfile();
-      } catch (e) {
-        alert("failed to connect wallet");
+  document.getElementById("followBtn").onclick = async () => {
+    if (!currentWallet) {
+      if (window.solana && window.solana.isPhantom) {
+        try {
+          const res = await window.solana.connect();
+          currentWallet = res.publicKey.toString();
+          loadProfile();
+        } catch (e) {
+          alert("failed to connect wallet");
+        }
+      } else {
+        alert("phantom wallet required");
       }
-    } else {
-      alert("phantom wallet required");
+      return;
     }
-    return;
-  }
 
-  const followBtn = document.getElementById("followBtn");
-  const isFollowing = followBtn.classList.contains("following");
+    const followBtn = document.getElementById("followBtn");
+    const isFollowing = followBtn.classList.contains("following");
 
-  if (isFollowing) {
-    await supabase
-      .from("follows")
-      .delete()
-      .eq("follower_wallet", currentWallet)
-      .eq("following_wallet", profileWallet);
-  } else {
-    await supabase
-      .from("follows")
-      .insert({
-        follower_wallet: currentWallet,
-        following_wallet: profileWallet
-      });
-  }
+    if (isFollowing) {
+      await supabase
+        .from("follows")
+        .delete()
+        .eq("follower_wallet", currentWallet)
+        .eq("following_wallet", profileWallet);
+    } else {
+      await supabase
+        .from("follows")
+        .insert({
+          follower_wallet: currentWallet,
+          following_wallet: profileWallet
+        });
+    }
 
-  loadProfile();
-};
+    loadProfile();
+  };
 
-document.getElementById("backBtn").onclick = () => {
-  window.location.href = "index.html";
-};
+  document.getElementById("backBtn").onclick = () => {
+    window.location.href = "index.html";
+  };
 
-init();
+  init();
+});
