@@ -4,44 +4,66 @@
   <meta charset="UTF-8" />
   <title>—</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="crypto-native social layer" />
+  <meta name="description" content="a crypto-native social layer. one wallet. one voice." />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
   <link rel="stylesheet" href="style.css" />
 </head>
+
 <body>
+  <div class="bg"></div>
 
-<div class="bg"></div>
+  <main class="app">
 
-<main class="app">
+    <header class="top">
+      <div class="logo">—</div>
+    </header>
 
-  <header class="top">
-    <div class="logo">—</div>
-  </header>
+    <section class="hero">
+      <h1>
+        say one thing<br/>
+        as your wallet
+      </h1>
+      <p>
+        no followers. no likes.<br/>
+        just a public statement tied to your on-chain identity.
+      </p>
+    </section>
 
-  <section class="hero">
-    <h1>say one thing<br>as your wallet</h1>
-    <p>public statements · wallet-signed</p>
-  </section>
+    <section class="card">
+      <button id="connectBtn">connect wallet</button>
 
-  <section class="card">
-    <button id="connectBtn">connect wallet</button>
+      <div id="usernameBox" class="hidden">
+        <input id="usernameInput" placeholder="@username" maxlength="15" />
+      </div>
 
-    <input id="usernameInput" placeholder="@username" class="hidden" />
+      <textarea
+        id="statementInput"
+        placeholder="write one sentence you stand by"
+        maxlength="140"
+      ></textarea>
 
-    <textarea id="statementInput" placeholder="write one sentence"></textarea>
+      <button id="publishBtn" class="disabled">
+        publish statement
+      </button>
 
-    <button id="publishBtn" class="disabled">publish</button>
+      <div id="status" class="status"></div>
+    </section>
 
-    <div id="status" class="status"></div>
-  </section>
+    <section class="feed" id="feed"></section>
 
-  <section id="feed" class="feed"></section>
 
-</main>
+  </main>
 
-<script src="https://unpkg.com/@solana/web3.js@latest/lib/index.iife.js"></script>
-<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
-<script src="app.js"></script>
+  <footer>
+    early access · public statements · wallet-signed
+  </footer>
 
+  <script src="https://unpkg.com/@solana/web3.js@latest/lib/index.iife.js"></script>
+  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+  <script src="app.js"></script>
 </body>
 </html>
