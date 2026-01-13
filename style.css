@@ -474,4 +474,10 @@ footer {
 #followBtn:disabled {
   opacity: 0.6;
   cursor: not-allowed;
+  pointer-events: none;
+}
+
+#followBtn.following {
+  cursor: pointer;
+  pointer-events: auto;
 }

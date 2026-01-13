@@ -96,6 +96,8 @@ async function loadProfile() {
   if (currentWallet && currentWallet === profileWallet) {
     followBtn.style.display = "none";
   } else if (currentWallet) {
+    followBtn.style.display = "block";
+    
     const { data: existingFollow } = await supabase
       .from("follows")
       .select("id")
@@ -106,15 +108,19 @@ async function loadProfile() {
     if (existingFollow) {
       followBtn.innerText = "unfollow";
       followBtn.classList.add("following");
+      followBtn.classList.remove("disabled");
     } else {
       followBtn.innerText = "follow";
       followBtn.classList.remove("following");
+      followBtn.classList.remove("disabled");
     }
 
-    followBtn.classList.remove("disabled");
+    followBtn.disabled = false;
+    followBtn.style.pointerEvents = "auto";
   } else {
     followBtn.innerText = "connect wallet to follow";
     followBtn.classList.add("disabled");
+    followBtn.disabled = true;
   }
 
   const container = document.getElementById("posts");
@@ -144,7 +150,7 @@ async function loadProfile() {
           currentWallet = res.publicKey.toString();
           localStorage.setItem("wallet", currentWallet);
           await restoreWallet();
-          loadProfile();
+          await loadProfile();
         } catch (e) {
           alert("failed to connect wallet");
         }
@@ -159,25 +165,46 @@ async function loadProfile() {
 
     // Désactiver le bouton pendant l'opération
     followBtn.disabled = true;
+    followBtn.style.pointerEvents = "none";
 
-    if (isFollowing) {
-      await supabase
-        .from("follows")
-        .delete()
-        .eq("follower_wallet", currentWallet)
-        .eq("following_wallet", profileWallet);
-    } else {
-      await supabase
-        .from("follows")
-        .insert({
-          follower_wallet: currentWallet,
-          following_wallet: profileWallet
-        });
+    try {
+      if (isFollowing) {
+        const { error } = await supabase
+          .from("follows")
+          .delete()
+          .eq("follower_wallet", currentWallet)
+          .eq("following_wallet", profileWallet);
+        
+        if (error) {
+          console.error("Error unfollowing:", error);
+          alert("Failed to unfollow");
+        }
+      } else {
+        const { error } = await supabase
+          .from("follows")
+          .insert({
+            follower_wallet: currentWallet,
+            following_wallet: profileWallet
+          });
+        
+        if (error) {
+          console.error("Error following:", error);
+          alert("Failed to follow");
+        }
+      }
+
+      // Réactiver le bouton et recharger le profil
+      followBtn.disabled = false;
+      followBtn.style.pointerEvents = "auto";
+      
+      // Recharger le profil pour mettre à jour le bouton
+      await loadProfile();
+    } catch (error) {
+      console.error("Error:", error);
+      followBtn.disabled = false;
+      followBtn.style.pointerEvents = "auto";
+      alert("An error occurred");
     }
-
-    // Réactiver le bouton et recharger le profil
-    followBtn.disabled = false;
-    await loadProfile();
   };
 
   document.getElementById("backBtn").onclick = () => {
