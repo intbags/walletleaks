@@ -2,10 +2,9 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>walletleaks</title>
-
+  <title>—</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="walletleaks reveals what your solana wallet publicly says about you." />
+  <meta name="description" content="a crypto-native social layer. one wallet. one voice." />
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -15,61 +14,52 @@
 </head>
 
 <body>
-  <div class="background"></div>
+  <div class="bg"></div>
 
   <main class="app">
 
-    <header class="header">
-      <div class="logo">walletleaks</div>
+    <header class="top">
+      <div class="logo">—</div>
     </header>
 
     <section class="hero">
       <h1>
-        your solana wallet<br />
-        already has a reputation
+        say one thing<br/>
+        as your wallet
       </h1>
-
-      <p class="hero-sub">
-        walletleaks analyzes publicly visible on-chain behavior<br />
-        and reflects the profile it exposes.
+      <p>
+        no followers. no likes.<br/>
+        just a public statement tied to your on-chain identity.
       </p>
     </section>
 
-    <section class="scanner">
-      <input
-        id="addressInput"
-        type="text"
-        placeholder="paste a solana wallet address"
-        spellcheck="false"
-        autocomplete="off"
-      />
-      <button id="analyzeBtn">analyze</button>
-    </section>
+    <section class="card">
+      <button id="connectBtn">connect wallet</button>
 
-    <section id="loading" class="loading hidden">
-      analyzing on-chain patterns
-    </section>
-
-    <section id="result" class="result hidden">
-      <div class="verdict-label">wallet profile</div>
-      <div id="verdict" class="verdict-text"></div>
-      <div class="verdict-meta">
-        derived from publicly observable on-chain signals
+      <div id="usernameBox" class="hidden">
+        <input id="usernameInput" placeholder="@username" maxlength="15" />
       </div>
 
-      <button id="shareBtn" class="share-btn">
-        share result
+      <textarea
+        id="statementInput"
+        placeholder="write one sentence you stand by"
+        maxlength="140"
+      ></textarea>
+
+      <button id="publishBtn" class="disabled">
+        publish statement
       </button>
+
+      <div id="status" class="status"></div>
     </section>
 
   </main>
 
-  <footer class="footer">
-    <span>
-      data sourced from public solana rpc nodes and commonly used indexers
-    </span>
+  <footer>
+    early access · public statements · wallet-signed
   </footer>
 
+  <script src="https://unpkg.com/@solana/web3.js@latest/lib/index.iife.js"></script>
   <script src="app.js"></script>
 </body>
 </html>
