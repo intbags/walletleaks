@@ -78,7 +78,7 @@ async function updateFollowCounts() {
 async function loadProfile() {
   const { data: user } = await supabase
     .from("users")
-    .select("wallet")
+    .select("wallet, avatar_url")
     .eq("username", username)
     .maybeSingle();
 
@@ -92,6 +92,24 @@ async function loadProfile() {
   // S'assurer que currentWallet est défini
   if (!currentWallet) {
     await restoreWallet();
+  }
+
+  // Charger et afficher l'avatar
+  const avatarEl = document.getElementById("profileAvatar");
+  if (user.avatar_url) {
+    avatarEl.src = user.avatar_url;
+    avatarEl.style.display = "block";
+  } else {
+    avatarEl.src = "";
+    avatarEl.style.display = "none";
+  }
+
+  // Afficher le bouton d'édition si c'est notre profil
+  const avatarEditBtn = document.getElementById("avatarEditBtn");
+  if (currentWallet && currentWallet === profileWallet) {
+    avatarEditBtn.classList.remove("hidden");
+  } else {
+    avatarEditBtn.classList.add("hidden");
   }
 
   const { data: statements } = await supabase
@@ -304,6 +322,173 @@ async function loadProfile() {
   document.getElementById("closeFollowingBtn").onclick = () => {
     followingModal.classList.add("hidden");
   };
+
+  // ---------- AVATAR UPLOAD ----------
+  const avatarModal = document.getElementById("avatarModal");
+  const avatarEditBtn = document.getElementById("avatarEditBtn");
+  const avatarFileInput = document.getElementById("avatarFileInput");
+  const avatarPreview = document.getElementById("avatarPreview");
+  const saveAvatarBtn = document.getElementById("saveAvatarBtn");
+  const removeAvatarBtn = document.getElementById("removeAvatarBtn");
+  const closeAvatarBtn = document.getElementById("closeAvatarBtn");
+
+  let selectedAvatarFile = null;
+
+  avatarEditBtn.onclick = () => {
+    avatarModal.classList.remove("hidden");
+    const currentAvatar = document.getElementById("profileAvatar").src;
+    avatarPreview.src = currentAvatar || "";
+  };
+
+  closeAvatarBtn.onclick = () => {
+    avatarModal.classList.add("hidden");
+    selectedAvatarFile = null;
+    avatarFileInput.value = "";
+  };
+
+  avatarFileInput.onchange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      selectedAvatarFile = file;
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        avatarPreview.src = event.target.result;
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  saveAvatarBtn.onclick = async () => {
+    if (!currentWallet || currentWallet !== profileWallet) return;
+
+    try {
+      let avatarUrl = null;
+
+      if (selectedAvatarFile) {
+        // Upload vers Supabase Storage
+        const fileExt = selectedAvatarFile.name.split('.').pop();
+        const fileName = `${currentWallet}-${Date.now()}.${fileExt}`;
+        const filePath = `avatars/${fileName}`;
+
+        // Convertir l'image en blob et redimensionner si nécessaire
+        const resizedFile = await resizeImage(selectedAvatarFile, 400, 400);
+        
+        const { data: uploadData, error: uploadError } = await supabase.storage
+          .from('avatars')
+          .upload(filePath, resizedFile, {
+            cacheControl: '3600',
+            upsert: false
+          });
+
+        if (uploadError) {
+          console.error("Upload error:", uploadError);
+          alert("Failed to upload avatar");
+          return;
+        }
+
+        // Obtenir l'URL publique
+        const { data: urlData } = supabase.storage
+          .from('avatars')
+          .getPublicUrl(filePath);
+
+        avatarUrl = urlData.publicUrl;
+      }
+
+      // Mettre à jour dans la base de données
+      const { error: updateError } = await supabase
+        .from("users")
+        .update({ avatar_url: avatarUrl })
+        .eq("wallet", currentWallet);
+
+      if (updateError) {
+        console.error("Update error:", updateError);
+        alert("Failed to update avatar");
+        return;
+      }
+
+      // Mettre à jour l'affichage
+      const avatarEl = document.getElementById("profileAvatar");
+      if (avatarUrl) {
+        avatarEl.src = avatarUrl;
+        avatarEl.style.display = "block";
+      } else {
+        avatarEl.src = "";
+        avatarEl.style.display = "none";
+      }
+
+      avatarModal.classList.add("hidden");
+      selectedAvatarFile = null;
+      avatarFileInput.value = "";
+    } catch (error) {
+      console.error("Error:", error);
+      alert("An error occurred");
+    }
+  };
+
+  removeAvatarBtn.onclick = async () => {
+    if (!currentWallet || currentWallet !== profileWallet) return;
+
+    try {
+      const { error } = await supabase
+        .from("users")
+        .update({ avatar_url: null })
+        .eq("wallet", currentWallet);
+
+      if (error) {
+        console.error("Error removing avatar:", error);
+        alert("Failed to remove avatar");
+        return;
+      }
+
+      const avatarEl = document.getElementById("profileAvatar");
+      avatarEl.src = "";
+      avatarEl.style.display = "none";
+      avatarPreview.src = "";
+
+      avatarModal.classList.add("hidden");
+    } catch (error) {
+      console.error("Error:", error);
+      alert("An error occurred");
+    }
+  };
+
+  // Fonction pour redimensionner l'image
+  function resizeImage(file, maxWidth, maxHeight) {
+    return new Promise((resolve) => {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          let width = img.width;
+          let height = img.height;
+
+          if (width > height) {
+            if (width > maxWidth) {
+              height *= maxWidth / width;
+              width = maxWidth;
+            }
+          } else {
+            if (height > maxHeight) {
+              width *= maxHeight / height;
+              height = maxHeight;
+            }
+          }
+
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, width, height);
+
+          canvas.toBlob((blob) => {
+            resolve(blob);
+          }, 'image/jpeg', 0.9);
+        };
+        img.src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    });
+  }
 
   async function loadFollowers() {
     if (!profileWallet) return;

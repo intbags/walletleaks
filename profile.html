@@ -21,20 +21,32 @@
       <button id="backBtn" class="back-btn">← back</button>
 
       <div class="profile-info">
-        <h1 id="username"></h1>
-
-        <div class="profile-stats">
-          <div class="stat clickable" id="followersStat">
-            <span class="stat-value" id="followersCount">0</span>
-            <span class="stat-label">followers</span>
-          </div>
-          <div class="stat clickable" id="followingStat">
-            <span class="stat-value" id="followingCount">0</span>
-            <span class="stat-label">following</span>
+        <div class="profile-avatar-section">
+          <div class="profile-avatar-wrapper">
+            <img id="profileAvatar" class="profile-avatar" src="" alt="Profile avatar" />
+            <div id="avatarEditBtn" class="avatar-edit-btn hidden">
+              <input type="file" id="avatarInput" accept="image/*" style="display: none;" />
+              <button class="avatar-edit-icon">📷</button>
+            </div>
           </div>
         </div>
 
-        <button id="followBtn" class="disabled">follow</button>
+        <div class="profile-details">
+          <h1 id="username"></h1>
+
+          <div class="profile-stats">
+            <div class="stat clickable" id="followersStat">
+              <span class="stat-value" id="followersCount">0</span>
+              <span class="stat-label">followers</span>
+            </div>
+            <div class="stat clickable" id="followingStat">
+              <span class="stat-value" id="followingCount">0</span>
+              <span class="stat-label">following</span>
+            </div>
+          </div>
+
+          <button id="followBtn" class="disabled">follow</button>
+        </div>
       </div>
     </header>
 
@@ -61,6 +73,26 @@
         <button class="close-btn" id="closeFollowingBtn">✕</button>
       </div>
       <div class="following-list" id="followingList"></div>
+    </div>
+  </div>
+
+  <!-- AVATAR MODAL -->
+  <div id="avatarModal" class="modal hidden">
+    <div class="modal-card avatar-modal">
+      <div class="modal-header">
+        <h2>Change Profile Picture</h2>
+        <button class="close-btn" id="closeAvatarBtn">✕</button>
+      </div>
+      <div class="avatar-modal-content">
+        <div class="avatar-preview-wrapper">
+          <img id="avatarPreview" class="avatar-preview" src="" alt="Preview" />
+        </div>
+        <div class="avatar-actions">
+          <input type="file" id="avatarFileInput" accept="image/*" />
+          <button id="removeAvatarBtn" class="remove-avatar-btn">Remove Photo</button>
+          <button id="saveAvatarBtn" class="save-avatar-btn">Save</button>
+        </div>
+      </div>
     </div>
   </div>
 

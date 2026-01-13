@@ -360,7 +360,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const userMap = {};
     users.forEach(u => {
-      userMap[u.wallet] = u.username;
+      userMap[u.wallet] = {
+        username: u.username,
+        avatar_url: u.avatar_url || null
+      };
     });
 
     const likeMap = {};
@@ -382,7 +385,9 @@ document.addEventListener("DOMContentLoaded", () => {
     feedEl.innerHTML = "";
 
     statements.forEach(p => {
-      const username = userMap[p.user_wallet] || "@unknown";
+      const userInfo = userMap[p.user_wallet] || { username: "@unknown", avatar_url: null };
+      const username = userInfo.username;
+      const avatarUrl = userInfo.avatar_url;
       const likeData = likeMap[p.id] || { count: 0, liked: false };
       const commentCount = commentCountMap[p.id] || 0;
 
@@ -391,7 +396,10 @@ document.addEventListener("DOMContentLoaded", () => {
       el.innerHTML = `
         <div class="feed-card-content">
           <div class="feed-card-header">
-            <a href="profile.html?u=${encodeURIComponent(username)}" class="feed-card-author">${username}</a>
+            <div class="feed-card-author-section">
+              ${avatarUrl ? `<img src="${avatarUrl}" class="feed-card-avatar" alt="${username}" />` : '<div class="feed-card-avatar feed-card-avatar-placeholder"></div>'}
+              <a href="profile.html?u=${encodeURIComponent(username)}" class="feed-card-author">${username}</a>
+            </div>
             <span class="feed-card-date">${new Date(p.created_at).toLocaleDateString()}</span>
           </div>
           <div class="feed-card-text">${p.content}</div>
