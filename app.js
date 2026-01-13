@@ -1,103 +1,132 @@
 // =====================
-// SUPABASE CONFIG
+// SAFE BOOT
 // =====================
+document.addEventListener("DOMContentLoaded", () => {
+  console.log("app loaded");
+
+  // =====================
+  // CHECK DEPENDENCIES
+  // =====================
+  if (!window.supabase) {
+    console.error("supabase not loaded");
+    return;
+  }
+
+  // =====================
+  // SUPABASE
+  // =====================
 const SUPABASE_URL = "https://zzxqftnarcpjkqiztuof.supabase.co";
 const SUPABASE_ANON_KEY = "sb_publishable_T76EtSvgz5oMzg2zW2cGkA_I1fX3DIO";
 
-const supabase = window.supabase.createClient(
-  SUPABASE_URL,
-  SUPABASE_ANON_KEY
-);
+  const supabase = window.supabase.createClient(
+    SUPABASE_URL,
+    SUPABASE_ANON_KEY
+  );
 
-// =====================
-// DOM
-// =====================
-let wallet = null;
+  // =====================
+  // DOM ELEMENTS
+  // =====================
+  const connectBtn = document.getElementById("connectBtn");
+  const publishBtn = document.getElementById("publishBtn");
+  const statusEl = document.getElementById("status");
+  const statementInput = document.getElementById("statementInput");
+  const usernameBox = document.getElementById("usernameBox");
+  const usernameInput = document.getElementById("usernameInput");
 
-const connectBtn = document.getElementById("connectBtn");
-const publishBtn = document.getElementById("publishBtn");
-const statusEl = document.getElementById("status");
-const statementInput = document.getElementById("statementInput");
-const usernameBox = document.getElementById("usernameBox");
-const usernameInput = document.getElementById("usernameInput");
-
-// =====================
-// CONNECT WALLET
-// =====================
-connectBtn.onclick = async () => {
-  if (!window.solana || !window.solana.isPhantom) {
-    alert("phantom wallet required");
+  if (!connectBtn) {
+    console.error("connectBtn not found");
     return;
   }
 
-  const res = await window.solana.connect();
-  wallet = res.publicKey.toString();
+  let wallet = null;
 
-  connectBtn.innerText = "wallet connected";
-  connectBtn.classList.add("disabled");
+  // =====================
+  // CONNECT WALLET
+  // =====================
+  connectBtn.onclick = async () => {
+    console.log("connect clicked");
 
-  usernameBox.classList.remove("hidden");
-  publishBtn.classList.remove("disabled");
-};
+    if (!window.solana) {
+      alert("no solana wallet detected");
+      return;
+    }
 
-// =====================
-// PUBLISH STATEMENT
-// =====================
-publishBtn.onclick = async () => {
-  const text = statementInput.value.trim();
-  const username = usernameInput.value.trim();
+    if (!window.solana.isPhantom) {
+      alert("phantom wallet required");
+      return;
+    }
 
-  if (!wallet) {
-    statusEl.innerText = "connect wallet first";
-    return;
-  }
+    try {
+      const res = await window.solana.connect({ onlyIfTrusted: false });
+      wallet = res.publicKey.toString();
 
-  if (!username.startsWith("@") || username.length < 3) {
-    statusEl.innerText = "invalid username";
-    return;
-  }
+      connectBtn.innerText = "wallet connected";
+      connectBtn.classList.add("disabled");
 
-  if (!text) {
-    statusEl.innerText = "write a statement";
-    return;
-  }
+      usernameBox.classList.remove("hidden");
+      publishBtn.classList.remove("disabled");
 
-  try {
-    statusEl.innerText = "signing...";
+      statusEl.innerText = "wallet connected";
 
-    const message = `statement:${text}\nwallet:${wallet}`;
-    const encoded = new TextEncoder().encode(message);
-    const signed = await window.solana.signMessage(encoded, "utf8");
+    } catch (e) {
+      console.error(e);
+      statusEl.innerText = "connection cancelled";
+    }
+  };
 
-    const signatureBase64 = btoa(
-      String.fromCharCode(...signed.signature)
-    );
+  // =====================
+  // PUBLISH
+  // =====================
+  publishBtn.onclick = async () => {
+    if (!wallet) {
+      statusEl.innerText = "connect wallet first";
+      return;
+    }
 
-    statusEl.innerText = "saving...";
+    const text = statementInput.value.trim();
+    const username = usernameInput.value.trim();
 
-    // 1️⃣ upsert user
-    await supabase.from("users").upsert({
-      wallet: wallet,
-      username: username
-    });
+    if (!username.startsWith("@")) {
+      statusEl.innerText = "invalid username";
+      return;
+    }
 
-    // 2️⃣ insert statement
-    const { error } = await supabase.from("statements").insert({
-      user_wallet: wallet,
-      content: text,
-      signature: signatureBase64
-    });
+    if (!text) {
+      statusEl.innerText = "write a statement";
+      return;
+    }
 
-    if (error) throw error;
+    try {
+      statusEl.innerText = "signing...";
 
-    statusEl.innerText = "statement published";
+      const message = `statement:${text}\nwallet:${wallet}`;
+      const encoded = new TextEncoder().encode(message);
+      const signed = await window.solana.signMessage(encoded, "utf8");
 
-    setTimeout(() => {
-      window.location.href = `/@${username}`;
-    }, 800);
+      const signatureBase64 = btoa(
+        String.fromCharCode(...signed.signature)
+      );
 
-  } catch (err) {
-    console.error(err);
-    statusEl.innerText = "failed to publish";
-  }
-};
+      statusEl.innerText = "saving...";
+
+      await supabase.from("users").upsert({
+        wallet: wallet,
+        username: username
+      });
+
+      const { error } = await supabase.from("statements").insert({
+        user_wallet: wallet,
+        content: text,
+        signature: signatureBase64
+      });
+
+      if (error) throw error;
+
+      statusEl.innerText = "statement published";
+
+    } catch (err) {
+      console.error(err);
+      statusEl.innerText = "failed to publish";
+    }
+  };
+});
