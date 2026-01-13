@@ -137,6 +137,8 @@ html, body {
   font-weight: 600;
   letter-spacing: -1px;
   margin-bottom: 16px;
+  transition: opacity 0.4s ease;
+  
 }
 
 .verdict-meta {

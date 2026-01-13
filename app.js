@@ -57,10 +57,19 @@ analyzeBtn.onclick = async () => {
     }
 
     const verdict = computeVerdict(sol, tx, tokens);
-    verdictEl.innerText = verdict;
 
-    loadingEl.classList.add("hidden");
-    resultEl.classList.remove("hidden");
+// reset opacity before reveal
+verdictEl.style.opacity = 0;
+verdictEl.innerText = verdict;
+
+// small reveal delay
+setTimeout(() => {
+  verdictEl.style.opacity = 1;
+}, 50);
+
+loadingEl.classList.add("hidden");
+resultEl.classList.remove("hidden");
+
 
     shareBtn.onclick = () => {
       const text = `walletleaks says my solana wallet is: "${verdict}"`;
@@ -78,14 +87,18 @@ analyzeBtn.onclick = async () => {
 };
 
 function computeVerdict(sol, tx, tokens) {
-  if (tx > 500 && tokens > 20) return "likely degen trader";
-  if (tokens > 50 && sol < 2) return "airdrop farmer";
+  if (tx > 800) return "terminally online trader";
+  if (tx > 500) return "likely degen trader";
+  if (tokens > 80) return "airdrop farmer";
+  if (tokens > 40 && sol < 5) return "airdrop-heavy wallet";
+  if (tx < 5 && sol > 50) return "sleeping whale";
   if (tx < 10 && sol > 20) return "long-term holder";
-  if (tx > 200 && sol < 0.5) return "high-frequency grinder";
-  if (tx < 5 && sol > 5) return "inactive but funded wallet";
-  if (tx < 20 && tokens < 3) return "low on-chain footprint";
-  return "generic solana participant";
+  if (tx > 200 && sol < 1) return "high-frequency grinder";
+  if (tokens < 3 && tx < 20) return "low on-chain footprint";
+  if (tx < 30) return "casual solana user";
+  return "active on-chain participant";
 }
+
 
 // -------- RPC WITH FALLBACK --------
 async function rpcSafe(method, params) {
