@@ -5,34 +5,58 @@ const resultEl = document.getElementById("result");
 const verdictEl = document.getElementById("verdict");
 const shareBtn = document.getElementById("shareBtn");
 
-const RPC_URL = "https://api.mainnet-beta.solana.com";
+const RPC_PRIMARY = "https://api.mainnet-beta.solana.com";
+const RPC_FALLBACK = "https://mainnet.helius-rpc.com/?api-key=b5dce25c-09db-45bd-ba9b-d2e2f16fc841";
+
 const TOKEN_PROGRAM_ID =
   "TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA";
 
 analyzeBtn.onclick = async () => {
   const address = addressInput.value.trim();
-  if (!address) return;
+
+  if (!isValidSolanaAddress(address)) {
+    alert("invalid solana address");
+    return;
+  }
 
   resultEl.classList.add("hidden");
   loadingEl.classList.remove("hidden");
 
+  let sol = 0;
+  let tx = 0;
+  let tokens = 0;
+
   try {
-    await sleep(900);
+    await sleep(700);
 
-    const balance = await rpc("getBalance", [address]);
-    const sigs = await rpc("getSignaturesForAddress", [address, { limit: 500 }]);
-    const tokens = await rpc("getTokenAccountsByOwner", [
-      address,
-      { programId: TOKEN_PROGRAM_ID },
-      { encoding: "jsonParsed" }
-    ]);
+    // balance (critical)
+    const balanceRes = await rpcSafe("getBalance", [address]);
+    sol = balanceRes?.value ? balanceRes.value / 1e9 : 0;
 
-    const sol = balance?.value / 1e9 || 0;
-    const tx = sigs?.length || 0;
-    const tokenCount = tokens?.value?.length || 0;
+    // tx count (non critical)
+    try {
+      const sigs = await rpcSafe("getSignaturesForAddress", [
+        address,
+        { limit: 300 }
+      ]);
+      tx = sigs?.length || 0;
+    } catch {
+      tx = 0;
+    }
 
-    const verdict = computeVerdict(sol, tx, tokenCount);
+    // token accounts (non critical)
+    try {
+      const tokenRes = await rpcSafe("getTokenAccountsByOwner", [
+        address,
+        { programId: TOKEN_PROGRAM_ID },
+        { encoding: "jsonParsed" }
+      ]);
+      tokens = tokenRes?.value?.length || 0;
+    } catch {
+      tokens = 0;
+    }
 
+    const verdict = computeVerdict(sol, tx, tokens);
     verdictEl.innerText = verdict;
 
     loadingEl.classList.add("hidden");
@@ -47,8 +71,9 @@ analyzeBtn.onclick = async () => {
     };
 
   } catch (e) {
+    console.error(e);
     loadingEl.classList.add("hidden");
-    alert("unable to analyze wallet");
+    alert("rpc unavailable. try again.");
   }
 };
 
@@ -62,12 +87,17 @@ function computeVerdict(sol, tx, tokens) {
   return "generic solana participant";
 }
 
-function sleep(ms) {
-  return new Promise(r => setTimeout(r, ms));
+// -------- RPC WITH FALLBACK --------
+async function rpcSafe(method, params) {
+  try {
+    return await rpcCall(RPC_PRIMARY, method, params);
+  } catch {
+    return await rpcCall(RPC_FALLBACK, method, params);
+  }
 }
 
-async function rpc(method, params) {
-  const res = await fetch(RPC_URL, {
+async function rpcCall(url, method, params) {
+  const res = await fetch(url, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
@@ -81,4 +111,13 @@ async function rpc(method, params) {
   const json = await res.json();
   if (json.error) throw new Error(json.error.message);
   return json.result;
+}
+
+// -------- HELPERS --------
+function isValidSolanaAddress(address) {
+  return /^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(address);
+}
+
+function sleep(ms) {
+  return new Promise(r => setTimeout(r, ms));
 }
