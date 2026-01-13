@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>walletleaks</title>
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="walletleaks reveals what your solana wallet publicly says about you." />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="style.css" />
+</head>
+
+<body>
+  <div class="background"></div>
+
+  <main class="app">
+
+    <header class="header">
+      <div class="logo">walletleaks</div>
+    </header>
+
+    <section class="hero">
+      <h1>
+        your solana wallet<br />
+        already has a reputation
+      </h1>
+
+      <p class="hero-sub">
+        walletleaks analyzes publicly visible on-chain behavior<br />
+        and reflects the profile it exposes.
+      </p>
+    </section>
+
+    <section class="scanner">
+      <input
+        id="addressInput"
+        type="text"
+        placeholder="paste a solana wallet address"
+        spellcheck="false"
+        autocomplete="off"
+      />
+      <button id="analyzeBtn">analyze</button>
+    </section>
+
+    <section id="loading" class="loading hidden">
+      analyzing on-chain patterns
+    </section>
+
+    <section id="result" class="result hidden">
+      <div class="verdict-label">wallet profile</div>
+      <div id="verdict" class="verdict-text"></div>
+      <div class="verdict-meta">
+        derived from publicly observable on-chain signals
+      </div>
+
+      <button id="shareBtn" class="share-btn">
+        share result
+      </button>
+    </section>
+
+  </main>
+
+  <footer class="footer">
+    <span>
+      data sourced from public solana rpc nodes and commonly used indexers
+    </span>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
