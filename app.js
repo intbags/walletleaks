@@ -1,3 +1,17 @@
+// =====================
+// SUPABASE CONFIG
+// =====================
+const SUPABASE_URL = "https://zzxqftnarcpjkqiztuof.supabase.co";
+const SUPABASE_ANON_KEY = "sb_publishable_T76EtSvgz5oMzg2zW2cGkA_I1fX3DIO";
+
+const supabase = window.supabase.createClient(
+  SUPABASE_URL,
+  SUPABASE_ANON_KEY
+);
+
+// =====================
+// DOM
+// =====================
 let wallet = null;
 
 const connectBtn = document.getElementById("connectBtn");
@@ -7,6 +21,9 @@ const statementInput = document.getElementById("statementInput");
 const usernameBox = document.getElementById("usernameBox");
 const usernameInput = document.getElementById("usernameInput");
 
+// =====================
+// CONNECT WALLET
+// =====================
 connectBtn.onclick = async () => {
   if (!window.solana || !window.solana.isPhantom) {
     alert("phantom wallet required");
@@ -23,29 +40,64 @@ connectBtn.onclick = async () => {
   publishBtn.classList.remove("disabled");
 };
 
+// =====================
+// PUBLISH STATEMENT
+// =====================
 publishBtn.onclick = async () => {
   const text = statementInput.value.trim();
   const username = usernameInput.value.trim();
 
-  if (!text || !username.startsWith("@")) {
-    statusEl.innerText = "add a @username and a statement";
+  if (!wallet) {
+    statusEl.innerText = "connect wallet first";
     return;
   }
 
-  statusEl.innerText = "signing statement...";
+  if (!username.startsWith("@") || username.length < 3) {
+    statusEl.innerText = "invalid username";
+    return;
+  }
 
-  const message = `statement:\n${text}\nby ${username}\nwallet:${wallet}`;
-  const encoded = new TextEncoder().encode(message);
+  if (!text) {
+    statusEl.innerText = "write a statement";
+    return;
+  }
 
-  await window.solana.signMessage(encoded, "utf8");
+  try {
+    statusEl.innerText = "signing...";
 
-  statusEl.innerText = "statement published";
+    const message = `statement:${text}\nwallet:${wallet}`;
+    const encoded = new TextEncoder().encode(message);
+    const signed = await window.solana.signMessage(encoded, "utf8");
 
-  const tweet = `i just posted a public statement as my wallet:\n"${text}"`;
-  setTimeout(() => {
-    window.open(
-      `https://twitter.com/intent/tweet?text=${encodeURIComponent(tweet)}`,
-      "_blank"
+    const signatureBase64 = btoa(
+      String.fromCharCode(...signed.signature)
     );
-  }, 600);
+
+    statusEl.innerText = "saving...";
+
+    // 1️⃣ upsert user
+    await supabase.from("users").upsert({
+      wallet: wallet,
+      username: username
+    });
+
+    // 2️⃣ insert statement
+    const { error } = await supabase.from("statements").insert({
+      user_wallet: wallet,
+      content: text,
+      signature: signatureBase64
+    });
+
+    if (error) throw error;
+
+    statusEl.innerText = "statement published";
+
+    setTimeout(() => {
+      window.location.href = `/@${username}`;
+    }, 800);
+
+  } catch (err) {
+    console.error(err);
+    statusEl.innerText = "failed to publish";
+  }
 };
