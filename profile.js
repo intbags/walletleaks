@@ -277,6 +277,118 @@ async function loadProfile() {
     window.location.href = "index.html";
   };
 
+  // ---------- FOLLOWERS/FOLLOWING MODALS ----------
+  const followersModal = document.getElementById("followersModal");
+  const followingModal = document.getElementById("followingModal");
+  const followersList = document.getElementById("followersList");
+  const followingList = document.getElementById("followingList");
+
+  document.getElementById("followersStat").onclick = () => {
+    if (profileWallet) {
+      loadFollowers();
+      followersModal.classList.remove("hidden");
+    }
+  };
+
+  document.getElementById("followingStat").onclick = () => {
+    if (profileWallet) {
+      loadFollowing();
+      followingModal.classList.remove("hidden");
+    }
+  };
+
+  document.getElementById("closeFollowersBtn").onclick = () => {
+    followersModal.classList.add("hidden");
+  };
+
+  document.getElementById("closeFollowingBtn").onclick = () => {
+    followingModal.classList.add("hidden");
+  };
+
+  async function loadFollowers() {
+    if (!profileWallet) return;
+
+    const { data: follows } = await supabase
+      .from("follows")
+      .select("follower_wallet")
+      .eq("following_wallet", profileWallet);
+
+    if (!follows || follows.length === 0) {
+      followersList.innerHTML = '<div class="empty-state">no followers yet</div>';
+      return;
+    }
+
+    const wallets = follows.map(f => f.follower_wallet);
+    
+    if (wallets.length === 0) {
+      followersList.innerHTML = '<div class="empty-state">no followers yet</div>';
+      return;
+    }
+
+    const { data: users } = await supabase
+      .from("users")
+      .select("wallet, username")
+      .in("wallet", wallets);
+
+    followersList.innerHTML = "";
+
+    if (!users || users.length === 0) {
+      followersList.innerHTML = '<div class="empty-state">no followers yet</div>';
+      return;
+    }
+
+    users.forEach(user => {
+      const userEl = document.createElement("div");
+      userEl.className = "user-item";
+      userEl.innerHTML = `
+        <a href="profile.html?u=${encodeURIComponent(user.username)}" class="user-link">${user.username}</a>
+      `;
+      followersList.appendChild(userEl);
+    });
+  }
+
+  async function loadFollowing() {
+    if (!profileWallet) return;
+
+    const { data: follows } = await supabase
+      .from("follows")
+      .select("following_wallet")
+      .eq("follower_wallet", profileWallet);
+
+    if (!follows || follows.length === 0) {
+      followingList.innerHTML = '<div class="empty-state">not following anyone yet</div>';
+      return;
+    }
+
+    const wallets = follows.map(f => f.following_wallet);
+    
+    if (wallets.length === 0) {
+      followingList.innerHTML = '<div class="empty-state">not following anyone yet</div>';
+      return;
+    }
+
+    const { data: users } = await supabase
+      .from("users")
+      .select("wallet, username")
+      .in("wallet", wallets);
+
+    followingList.innerHTML = "";
+
+    if (!users || users.length === 0) {
+      followingList.innerHTML = '<div class="empty-state">not following anyone yet</div>';
+      return;
+    }
+
+    users.forEach(user => {
+      const userEl = document.createElement("div");
+      userEl.className = "user-item";
+      userEl.innerHTML = `
+        <a href="profile.html?u=${encodeURIComponent(user.username)}" class="user-link">${user.username}</a>
+      `;
+      followingList.appendChild(userEl);
+    });
+  }
+
   // Écouter la déconnexion de Phantom
   if (window.solana) {
     window.solana.on("disconnect", () => {

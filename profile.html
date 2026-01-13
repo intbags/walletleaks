@@ -24,11 +24,11 @@
         <h1 id="username"></h1>
 
         <div class="profile-stats">
-          <div class="stat">
+          <div class="stat clickable" id="followersStat">
             <span class="stat-value" id="followersCount">0</span>
             <span class="stat-label">followers</span>
           </div>
-          <div class="stat">
+          <div class="stat clickable" id="followingStat">
             <span class="stat-value" id="followingCount">0</span>
             <span class="stat-label">following</span>
           </div>
@@ -41,6 +41,28 @@
     <section class="feed" id="posts"></section>
 
   </main>
+
+  <!-- FOLLOWERS MODAL -->
+  <div id="followersModal" class="modal hidden">
+    <div class="modal-card followers-modal">
+      <div class="modal-header">
+        <h2>Followers</h2>
+        <button class="close-btn" id="closeFollowersBtn">✕</button>
+      </div>
+      <div class="followers-list" id="followersList"></div>
+    </div>
+  </div>
+
+  <!-- FOLLOWING MODAL -->
+  <div id="followingModal" class="modal hidden">
+    <div class="modal-card following-modal">
+      <div class="modal-header">
+        <h2>Following</h2>
+        <button class="close-btn" id="closeFollowingBtn">✕</button>
+      </div>
+      <div class="following-list" id="followingList"></div>
+    </div>
+  </div>
 
   <script src="https://unpkg.com/@solana/web3.js@latest/lib/index.iife.js"></script>
   <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
