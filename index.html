@@ -36,10 +36,6 @@
     <section class="card">
       <button id="connectBtn">connect wallet</button>
 
-      <div id="usernameBox" class="hidden">
-        <input id="usernameInput" placeholder="@username" maxlength="15" />
-      </div>
-
       <textarea
         id="statementInput"
         placeholder="write one sentence you stand by"
@@ -55,12 +51,21 @@
 
     <section class="feed" id="feed"></section>
 
-
   </main>
 
   <footer>
     early access · public statements · wallet-signed
   </footer>
+
+  <!-- USERNAME MODAL -->
+  <div id="usernameModal" class="modal hidden">
+    <div class="modal-card">
+      <h2>choose your username</h2>
+      <input id="modalUsernameInput" placeholder="@username" maxlength="15" />
+      <div id="usernameStatus" class="status"></div>
+      <button id="confirmUsernameBtn" class="disabled">confirm</button>
+    </div>
+  </div>
 
   <script src="https://unpkg.com/@solana/web3.js@latest/lib/index.iife.js"></script>
   <script src="https://unpkg.com/@supabase/supabase-js@2"></script>

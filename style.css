@@ -122,3 +122,69 @@ footer {
 .hidden {
   display: none;
 }
+
+.feed {
+  margin-top: 40px;
+}
+
+.post {
+  padding: 16px 0;
+  border-top: 1px solid #1c1c1c;
+}
+
+.post a {
+  color: #aaa;
+  text-decoration: none;
+  font-size: 13px;
+}
+
+.post div {
+  margin-top: 6px;
+  font-size: 15px;
+  color: #eaeaea;
+}
+
+/* MODAL */
+
+.modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 999;
+}
+
+.modal.hidden {
+  display: none;
+}
+
+.modal-card {
+  background: #0b0b0b;
+  border: 1px solid #222;
+  padding: 24px;
+  width: 320px;
+  border-radius: 14px;
+}
+
+.modal-card h2 {
+  font-size: 14px;
+  font-weight: 500;
+  margin-bottom: 12px;
+}
+
+.modal-card input {
+  width: 100%;
+  padding: 10px;
+  background: #111;
+  border: 1px solid #333;
+  color: white;
+  border-radius: 8px;
+}
+
+.modal-card button {
+  width: 100%;
+  margin-top: 14px;
+}
+
