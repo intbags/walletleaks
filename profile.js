@@ -58,6 +58,23 @@ async function restoreWallet() {
   }
 }
 
+async function updateFollowCounts() {
+  if (!profileWallet) return;
+  
+  const { count: followersCount } = await supabase
+    .from("follows")
+    .select("*", { count: "exact", head: true })
+    .eq("following_wallet", profileWallet);
+
+  const { count: followingCount } = await supabase
+    .from("follows")
+    .select("*", { count: "exact", head: true })
+    .eq("follower_wallet", profileWallet);
+
+  document.getElementById("followersCount").innerText = followersCount || 0;
+  document.getElementById("followingCount").innerText = followingCount || 0;
+}
+
 async function loadProfile() {
   const { data: user } = await supabase
     .from("users")
@@ -83,18 +100,7 @@ async function loadProfile() {
     .eq("user_wallet", user.wallet)
     .order("created_at", { ascending: false });
 
-  const { count: followersCount } = await supabase
-    .from("follows")
-    .select("*", { count: "exact", head: true })
-    .eq("following_wallet", user.wallet);
-
-  const { count: followingCount } = await supabase
-    .from("follows")
-    .select("*", { count: "exact", head: true })
-    .eq("follower_wallet", user.wallet);
-
-  document.getElementById("followersCount").innerText = followersCount || 0;
-  document.getElementById("followingCount").innerText = followingCount || 0;
+  await updateFollowCounts();
 
   const followBtn = document.getElementById("followBtn");
 
@@ -257,11 +263,8 @@ async function loadProfile() {
       followBtn.disabled = false;
       followBtn.style.pointerEvents = "auto";
       
-      // Attendre un peu pour que la base de données se mette à jour
-      await new Promise(resolve => setTimeout(resolve, 500));
-      
-      // Recharger le profil pour mettre à jour les compteurs et vérifier l'état
-      await loadProfile();
+      // Mettre à jour seulement les compteurs sans toucher au bouton
+      await updateFollowCounts();
     } catch (error) {
       console.error("Error:", error);
       followBtn.disabled = false;
