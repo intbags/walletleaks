@@ -89,6 +89,12 @@ button {
   border: none;
   cursor: pointer;
   font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+button:hover:not(.disabled) {
+  transform: translateY(-1px);
+  opacity: 0.9;
 }
 
 button.disabled {
@@ -117,6 +123,7 @@ footer {
   padding: 30px;
   font-size: 11px;
   color: #666;
+  text-align: center;
 }
 
 .hidden {
@@ -124,6 +131,8 @@ footer {
 }
 
 .feed {
+  width: 100%;
+  max-width: 600px;
   margin-top: 40px;
 }
 
@@ -132,19 +141,40 @@ footer {
   border-top: 1px solid #1c1c1c;
 }
 
+.post:first-child {
+  border-top: none;
+}
+
 .post a {
   color: #aaa;
   text-decoration: none;
   font-size: 13px;
+  transition: color 0.2s ease;
 }
 
-.post div {
+.post a:hover {
+  color: #fff;
+}
+
+.post > div:not(.post-date) {
   margin-top: 6px;
   font-size: 15px;
   color: #eaeaea;
+  line-height: 1.5;
 }
 
-/* MODAL */
+.post-date {
+  margin-top: 8px;
+  font-size: 12px;
+  color: #555;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 40px 20px;
+  color: #666;
+  font-size: 14px;
+}
 
 .modal {
   position: fixed;
@@ -188,3 +218,79 @@ footer {
   margin-top: 14px;
 }
 
+.profile-page {
+  max-width: 700px;
+}
+
+.profile-header {
+  width: 100%;
+  margin-bottom: 40px;
+}
+
+.back-btn {
+  background: transparent;
+  color: #888;
+  font-size: 14px;
+  padding: 8px 12px;
+  margin-bottom: 30px;
+  border: 1px solid #222;
+}
+
+.back-btn:hover {
+  color: #fff;
+  border-color: #333;
+}
+
+.profile-info {
+  text-align: center;
+}
+
+.profile-info h1 {
+  font-size: 32px;
+  margin-bottom: 20px;
+  letter-spacing: -0.5px;
+}
+
+.profile-stats {
+  display: flex;
+  gap: 40px;
+  justify-content: center;
+  margin-bottom: 24px;
+}
+
+.stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.stat-value {
+  font-size: 24px;
+  font-weight: 600;
+  color: #fff;
+}
+
+.stat-label {
+  font-size: 12px;
+  color: #666;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+#followBtn {
+  background: #fff;
+  color: #000;
+  max-width: 200px;
+  margin: 0 auto;
+}
+
+#followBtn.following {
+  background: transparent;
+  color: #888;
+  border: 1px solid #333;
+}
+
+#followBtn.following:hover {
+  border-color: #ff4444;
+  color: #ff4444;
+}

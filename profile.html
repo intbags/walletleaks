@@ -1,19 +1,49 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>profile</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<main class="app">
-  <h1 id="username"></h1>
-  <button id="followBtn">follow</button>
-  <div id="posts" class="feed"></div>
-</main>
+  <div class="bg"></div>
 
-<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
-<script src="profile.js"></script>
+  <main class="app profile-page">
+
+    <header class="profile-header">
+      <button id="backBtn" class="back-btn">← back</button>
+
+      <div class="profile-info">
+        <h1 id="username"></h1>
+
+        <div class="profile-stats">
+          <div class="stat">
+            <span class="stat-value" id="followersCount">0</span>
+            <span class="stat-label">followers</span>
+          </div>
+          <div class="stat">
+            <span class="stat-value" id="followingCount">0</span>
+            <span class="stat-label">following</span>
+          </div>
+        </div>
+
+        <button id="followBtn" class="disabled">follow</button>
+      </div>
+    </header>
+
+    <section class="feed" id="posts"></section>
+
+  </main>
+
+  <script src="https://unpkg.com/@solana/web3.js@latest/lib/index.iife.js"></script>
+  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+  <script src="profile.js"></script>
 </body>
 </html>
