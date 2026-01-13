@@ -104,6 +104,7 @@ async function loadProfile() {
     followBtn.style.display = "block";
     
     try {
+      console.log("Checking follow status:", currentWallet, "->", profileWallet);
       const { data: existingFollow, error } = await supabase
         .from("follows")
         .select("id")
@@ -115,11 +116,15 @@ async function loadProfile() {
         console.error("Error checking follow status:", error);
       }
 
-      if (existingFollow) {
+      console.log("Existing follow data:", existingFollow);
+
+      if (existingFollow && existingFollow.id) {
+        console.log("User is following, setting button to unfollow");
         followBtn.innerText = "unfollow";
         followBtn.classList.add("following");
         followBtn.classList.remove("disabled");
       } else {
+        console.log("User is not following, setting button to follow");
         followBtn.innerText = "follow";
         followBtn.classList.remove("following");
         followBtn.classList.remove("disabled");
@@ -193,6 +198,7 @@ async function loadProfile() {
     try {
       if (isFollowing) {
         // Unfollow
+        console.log("Unfollowing:", currentWallet, "->", profileWallet);
         const { data, error } = await supabase
           .from("follows")
           .delete()
@@ -207,35 +213,17 @@ async function loadProfile() {
           followBtn.style.pointerEvents = "auto";
           return;
         }
+        
+        console.log("Unfollow successful, data:", data);
+        
+        // Mettre à jour le bouton immédiatement
+        followBtn.innerText = "follow";
+        followBtn.classList.remove("following");
       } else {
-        // Follow - vérifier que les deux wallets existent dans users
-        const { data: followerExists } = await supabase
-          .from("users")
-          .select("wallet")
-          .eq("wallet", currentWallet)
-          .maybeSingle();
-
-        const { data: followingExists } = await supabase
-          .from("users")
-          .select("wallet")
-          .eq("wallet", profileWallet)
-          .maybeSingle();
-
-        if (!followerExists) {
-          alert("Your wallet is not registered. Please set a username first.");
-          followBtn.disabled = false;
-          followBtn.style.pointerEvents = "auto";
-          return;
-        }
-
-        if (!followingExists) {
-          alert("The profile you're trying to follow doesn't exist.");
-          followBtn.disabled = false;
-          followBtn.style.pointerEvents = "auto";
-          return;
-        }
-
-        const { data, error } = await supabase
+        // Follow
+        console.log("Following:", currentWallet, "->", profileWallet);
+        
+        const { data: insertData, error } = await supabase
           .from("follows")
           .insert({
             follower_wallet: currentWallet,
@@ -246,25 +234,33 @@ async function loadProfile() {
         if (error) {
           console.error("Error following:", error);
           if (error.code === "23505") {
-            // Duplicate key error - already following
-            console.log("Already following, refreshing...");
+            // Duplicate key error - already following, juste mettre à jour le bouton
+            console.log("Already following, updating button...");
+            followBtn.innerText = "unfollow";
+            followBtn.classList.add("following");
           } else {
             alert(`Failed to follow: ${error.message}`);
             followBtn.disabled = false;
             followBtn.style.pointerEvents = "auto";
             return;
           }
+        } else {
+          console.log("Follow successful, data:", insertData);
+          
+          // Mettre à jour le bouton immédiatement
+          followBtn.innerText = "unfollow";
+          followBtn.classList.add("following");
         }
       }
 
-      // Réactiver le bouton et recharger le profil
+      // Réactiver le bouton
       followBtn.disabled = false;
       followBtn.style.pointerEvents = "auto";
       
       // Attendre un peu pour que la base de données se mette à jour
-      await new Promise(resolve => setTimeout(resolve, 300));
+      await new Promise(resolve => setTimeout(resolve, 500));
       
-      // Recharger le profil pour mettre à jour le bouton
+      // Recharger le profil pour mettre à jour les compteurs et vérifier l'état
       await loadProfile();
     } catch (error) {
       console.error("Error:", error);
