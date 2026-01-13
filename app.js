@@ -130,3 +130,34 @@ const SUPABASE_ANON_KEY = "sb_publishable_T76EtSvgz5oMzg2zW2cGkA_I1fX3DIO";
     }
   };
 });
+
+  // =====================
+  // FEED
+  // =====================
+
+async function loadFeed() {
+  const { data, error } = await supabase
+    .from("statements")
+    .select("content, created_at, user_wallet")
+    .order("created_at", { ascending: false })
+    .limit(20);
+
+  if (error) return;
+
+  const feed = document.createElement("div");
+  feed.className = "feed";
+
+  data.forEach(s => {
+    const el = document.createElement("div");
+    el.className = "post";
+    el.innerHTML = `
+      <div class="post-content">${s.content}</div>
+      <div class="post-meta">${s.user_wallet.slice(0,6)}...</div>
+    `;
+    feed.appendChild(el);
+  });
+
+  document.querySelector(".app").appendChild(feed);
+}
+
+loadFeed();
