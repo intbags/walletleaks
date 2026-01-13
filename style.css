@@ -68,6 +68,30 @@ html, body {
   align-items: center;
 }
 
+.header-actions {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.profile-btn {
+  background: transparent;
+  color: var(--text-muted);
+  border: 1px solid var(--border);
+  font-size: 13px;
+  padding: 10px 18px;
+  transition: all 0.2s ease;
+}
+
+.profile-btn:hover:not(.hidden) {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.profile-btn.hidden {
+  display: none;
+}
+
 .logo {
   opacity: 0.8;
   font-weight: 600;
@@ -225,80 +249,133 @@ footer {
 
 .feed {
   width: 100%;
-  max-width: 600px;
+  max-width: 680px;
   margin-top: 40px;
-}
-
-.post {
-  padding: 16px 0;
-  border-top: 1px solid var(--border-soft);
-}
-
-.post:first-child {
-  border-top: none;
-}
-
-.post-header {
   display: flex;
-  gap: 8px;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.feed-card {
+  background: var(--bg-soft);
+  border: 1px solid var(--border);
+  border-radius: 24px;
+  padding: 0;
+  overflow: hidden;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.feed-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--accent), transparent);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.feed-card:hover {
+  border-color: var(--border);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+}
+
+.feed-card:hover::before {
+  opacity: 1;
+}
+
+.feed-card-content {
+  padding: 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.feed-card-header {
+  display: flex;
+  justify-content: space-between;
   align-items: center;
-  margin-bottom: 8px;
+  margin-bottom: 4px;
 }
 
-.post a {
-  color: var(--text-muted);
+.feed-card-author {
+  color: var(--accent);
   text-decoration: none;
-  font-size: 13px;
-  transition: color 0.2s ease;
-}
-
-.post a:hover {
-  color: var(--text);
-}
-
-.post-content {
-  margin-top: 6px;
   font-size: 15px;
-  color: var(--text-soft);
-  line-height: 1.5;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  letter-spacing: -0.2px;
 }
 
-.post-date {
-  margin-top: 8px;
+.feed-card-author:hover {
+  color: var(--text);
+  text-shadow: 0 0 8px var(--accent-glow);
+}
+
+.feed-card-date {
   font-size: 12px;
   color: var(--text-muted);
+  font-weight: 400;
 }
 
-/* =========================
-   POST ACTIONS
-========================= */
+.feed-card-text {
+  font-size: 16px;
+  color: var(--text-soft);
+  line-height: 1.6;
+  letter-spacing: -0.1px;
+  word-break: break-word;
+}
 
-.post-actions {
+.feed-card-actions {
   display: flex;
-  gap: 24px;
-  margin-top: 12px;
-  padding-top: 8px;
+  gap: 32px;
+  margin-top: 8px;
+  padding-top: 16px;
   border-top: 1px solid var(--border-soft);
 }
 
-.post-action-btn {
+.feed-action-btn {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
   background: none;
   border: none;
   color: var(--text-muted);
-  padding: 4px 0;
+  padding: 8px 12px;
   cursor: pointer;
-  font-size: 12px;
+  font-size: 13px;
+  border-radius: 10px;
+  transition: all 0.2s ease;
+  font-weight: 500;
 }
 
-.post-action-btn:hover {
+.feed-action-btn:hover {
+  background: var(--bg-input);
   color: var(--text);
+  transform: scale(1.05);
 }
 
-.post-action-btn.liked {
+.feed-action-btn.liked {
   color: var(--accent);
+}
+
+.feed-action-btn.liked:hover {
+  background: rgba(2, 255, 64, 0.1);
+}
+
+.feed-action-icon {
+  font-size: 16px;
+  line-height: 1;
+}
+
+.feed-action-count {
+  font-size: 13px;
+  min-width: 20px;
+  text-align: left;
 }
 
 /* =========================
@@ -377,15 +454,24 @@ footer {
   background: var(--accent);
   color: #000;
   box-shadow: 0 0 20px var(--accent-glow);
+  font-size: 13px;
+  padding: 10px 20px;
 }
 
 #followBtn.following {
   background: transparent;
   color: var(--text-muted);
   border: 1px solid var(--border);
+  box-shadow: none;
 }
 
 #followBtn.following:hover {
   border-color: var(--accent);
   color: var(--accent);
+  background: rgba(2, 255, 64, 0.1);
+}
+
+#followBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }

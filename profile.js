@@ -143,6 +143,7 @@ async function loadProfile() {
           const res = await window.solana.connect();
           currentWallet = res.publicKey.toString();
           localStorage.setItem("wallet", currentWallet);
+          await restoreWallet();
           loadProfile();
         } catch (e) {
           alert("failed to connect wallet");
@@ -155,6 +156,9 @@ async function loadProfile() {
 
     const followBtn = document.getElementById("followBtn");
     const isFollowing = followBtn.classList.contains("following");
+
+    // Désactiver le bouton pendant l'opération
+    followBtn.disabled = true;
 
     if (isFollowing) {
       await supabase
@@ -171,7 +175,9 @@ async function loadProfile() {
         });
     }
 
-    loadProfile();
+    // Réactiver le bouton et recharger le profil
+    followBtn.disabled = false;
+    await loadProfile();
   };
 
   document.getElementById("backBtn").onclick = () => {

@@ -13,6 +13,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // ---------- DOM ----------
   const connectBtn = document.getElementById("connectBtn");
+  const myProfileBtn = document.getElementById("myProfileBtn");
   const publishBtn = document.getElementById("publishBtn");
   const statementInput = document.getElementById("statementInput");
   const statusEl = document.getElementById("status");
@@ -71,6 +72,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (wallet) {
       connectBtn.classList.add("disabled");
+      myProfileBtn.classList.remove("hidden");
       publishBtn.classList.remove("disabled");
       heroSection.classList.add("hidden");
 
@@ -83,8 +85,19 @@ document.addEventListener("DOMContentLoaded", () => {
       if (data) {
         currentUsername = data.username;
       }
+    } else {
+      myProfileBtn.classList.add("hidden");
     }
   }
+
+  // ---------- MY PROFILE ----------
+  myProfileBtn.onclick = async () => {
+    if (!currentUsername) {
+      alert("please set your username first");
+      return;
+    }
+    window.location.href = `profile.html?u=${encodeURIComponent(currentUsername)}`;
+  };
 
   // ---------- CONNECT ----------
   connectBtn.onclick = async () => {
@@ -98,6 +111,7 @@ document.addEventListener("DOMContentLoaded", () => {
     localStorage.setItem("wallet", wallet);
 
     connectBtn.classList.add("disabled");
+    myProfileBtn.classList.remove("hidden");
     publishBtn.classList.remove("disabled");
     heroSection.classList.add("hidden");
 
@@ -373,20 +387,24 @@ document.addEventListener("DOMContentLoaded", () => {
       const commentCount = commentCountMap[p.id] || 0;
 
       const el = document.createElement("div");
-      el.className = "post";
+      el.className = "feed-card";
       el.innerHTML = `
-        <div class="post-header">
-          <a href="profile.html?u=${encodeURIComponent(username)}">${username}</a>
-        </div>
-        <div class="post-content">${p.content}</div>
-        <div class="post-date">${new Date(p.created_at).toLocaleDateString()}</div>
-        <div class="post-actions">
-          <button class="post-action-btn like-btn ${likeData.liked ? 'liked' : ''}" data-statement-id="${p.id}">
-            ♥ ${likeData.count}
-          </button>
-          <button class="post-action-btn comment-btn" data-statement-id="${p.id}">
-            💬 ${commentCount}
-          </button>
+        <div class="feed-card-content">
+          <div class="feed-card-header">
+            <a href="profile.html?u=${encodeURIComponent(username)}" class="feed-card-author">${username}</a>
+            <span class="feed-card-date">${new Date(p.created_at).toLocaleDateString()}</span>
+          </div>
+          <div class="feed-card-text">${p.content}</div>
+          <div class="feed-card-actions">
+            <button class="feed-action-btn like-btn ${likeData.liked ? 'liked' : ''}" data-statement-id="${p.id}">
+              <span class="feed-action-icon">♥</span>
+              <span class="feed-action-count">${likeData.count}</span>
+            </button>
+            <button class="feed-action-btn comment-btn" data-statement-id="${p.id}">
+              <span class="feed-action-icon">💬</span>
+              <span class="feed-action-count">${commentCount}</span>
+            </button>
+          </div>
         </div>
       `;
 
@@ -410,6 +428,7 @@ document.addEventListener("DOMContentLoaded", () => {
       wallet = null;
       localStorage.removeItem("wallet");
       connectBtn.classList.remove("disabled");
+      myProfileBtn.classList.add("hidden");
       publishBtn.classList.add("disabled");
       heroSection.classList.remove("hidden");
       currentUsername = null;
