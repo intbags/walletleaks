@@ -17,14 +17,23 @@ document.addEventListener("DOMContentLoaded", () => {
   const statementInput = document.getElementById("statementInput");
   const statusEl = document.getElementById("status");
   const feedEl = document.getElementById("feed");
+  const heroSection = document.getElementById("heroSection");
+  const publishCard = document.getElementById("publishCard");
 
   const usernameModal = document.getElementById("usernameModal");
   const modalUsernameInput = document.getElementById("modalUsernameInput");
   const confirmUsernameBtn = document.getElementById("confirmUsernameBtn");
   const usernameStatus = document.getElementById("usernameStatus");
 
+  const commentsModal = document.getElementById("commentsModal");
+  const commentsContainer = document.getElementById("commentsContainer");
+  const commentInput = document.getElementById("commentInput");
+  const submitCommentBtn = document.getElementById("submitCommentBtn");
+  const closeCommentsBtn = document.getElementById("closeCommentsBtn");
+
   let wallet = null;
   let currentUsername = null;
+  let currentStatementId = null;
 
   // ---------- CONNECT ----------
   connectBtn.onclick = async () => {
@@ -36,9 +45,9 @@ document.addEventListener("DOMContentLoaded", () => {
     const res = await window.solana.connect();
     wallet = res.publicKey.toString();
 
-    connectBtn.innerText = "wallet connected";
     connectBtn.classList.add("disabled");
     publishBtn.classList.remove("disabled");
+    heroSection.classList.add("hidden");
 
     const { data } = await supabase
       .from("users")
@@ -52,6 +61,8 @@ document.addEventListener("DOMContentLoaded", () => {
     } else {
       currentUsername = data.username;
     }
+
+    loadFeed();
   };
 
   // ---------- USERNAME INPUT ----------
@@ -146,6 +157,110 @@ document.addEventListener("DOMContentLoaded", () => {
     loadFeed();
   };
 
+  // ---------- LIKES ----------
+  async function toggleLike(statementId) {
+    if (!wallet) {
+      alert("connect wallet to like");
+      return;
+    }
+
+    const { data: existingLike } = await supabase
+      .from("likes")
+      .select("id")
+      .eq("statement_id", statementId)
+      .eq("user_wallet", wallet)
+      .maybeSingle();
+
+    if (existingLike) {
+      await supabase
+        .from("likes")
+        .delete()
+        .eq("id", existingLike.id);
+    } else {
+      await supabase.from("likes").insert({
+        statement_id: statementId,
+        user_wallet: wallet
+      });
+    }
+
+    loadFeed();
+  }
+
+  // ---------- COMMENTS MODAL ----------
+  closeCommentsBtn.onclick = () => {
+    commentsModal.classList.add("hidden");
+    currentStatementId = null;
+  };
+
+  submitCommentBtn.onclick = async () => {
+    if (!wallet) {
+      alert("connect wallet to comment");
+      return;
+    }
+
+    const text = commentInput.value.trim();
+    if (!text) return;
+
+    await supabase.from("comments").insert({
+      statement_id: currentStatementId,
+      user_wallet: wallet,
+      content: text
+    });
+
+    commentInput.value = "";
+    loadComments(currentStatementId);
+  };
+
+  async function openComments(statementId) {
+    currentStatementId = statementId;
+    commentsModal.classList.remove("hidden");
+    loadComments(statementId);
+  }
+
+  async function loadComments(statementId) {
+    const { data: comments } = await supabase
+      .from("comments")
+      .select("id, user_wallet, content, created_at")
+      .eq("statement_id", statementId)
+      .is("parent_comment_id", null)
+      .order("created_at", { ascending: false });
+
+    const wallets = [...new Set(comments?.map(c => c.user_wallet) || [])];
+    let userMap = {};
+
+    if (wallets.length > 0) {
+      const { data: users } = await supabase
+        .from("users")
+        .select("wallet, username")
+        .in("wallet", wallets);
+
+      users?.forEach(u => {
+        userMap[u.wallet] = u.username;
+      });
+    }
+
+    commentsContainer.innerHTML = "";
+
+    if (!comments || comments.length === 0) {
+      commentsContainer.innerHTML = '<div class="empty-comments">no replies yet</div>';
+      return;
+    }
+
+    comments.forEach(comment => {
+      const username = userMap[comment.user_wallet] || "@unknown";
+      const commentEl = document.createElement("div");
+      commentEl.className = "comment";
+      commentEl.innerHTML = `
+        <div class="comment-author">
+          <a href="profile.html?u=${encodeURIComponent(username)}">${username}</a>
+        </div>
+        <div class="comment-text">${comment.content}</div>
+        <div class="comment-date">${new Date(comment.created_at).toLocaleDateString()}</div>
+      `;
+      commentsContainer.appendChild(commentEl);
+    });
+  }
+
   // ---------- FEED ----------
   async function loadFeed() {
     const { data: statements } = await supabase
@@ -159,27 +274,80 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
+    const statementIds = statements.map(s => s.id);
     const wallets = [...new Set(statements.map(s => s.user_wallet))];
+
     const { data: users } = await supabase
       .from("users")
       .select("wallet, username")
       .in("wallet", wallets);
+
+    const { data: likes } = await supabase
+      .from("likes")
+      .select("statement_id, user_wallet")
+      .in("statement_id", statementIds);
+
+    const { data: commentCounts } = await supabase
+      .from("comments")
+      .select("statement_id")
+      .in("statement_id", statementIds);
 
     const userMap = {};
     users.forEach(u => {
       userMap[u.wallet] = u.username;
     });
 
+    const likeMap = {};
+    likes?.forEach(like => {
+      if (!likeMap[like.statement_id]) {
+        likeMap[like.statement_id] = { count: 0, liked: false };
+      }
+      likeMap[like.statement_id].count++;
+      if (wallet && like.user_wallet === wallet) {
+        likeMap[like.statement_id].liked = true;
+      }
+    });
+
+    const commentCountMap = {};
+    commentCounts?.forEach(comment => {
+      commentCountMap[comment.statement_id] = (commentCountMap[comment.statement_id] || 0) + 1;
+    });
+
     feedEl.innerHTML = "";
 
     statements.forEach(p => {
       const username = userMap[p.user_wallet] || "@unknown";
+      const likeData = likeMap[p.id] || { count: 0, liked: false };
+      const commentCount = commentCountMap[p.id] || 0;
+
       const el = document.createElement("div");
       el.className = "post";
       el.innerHTML = `
-        <a href="profile.html?u=${encodeURIComponent(username)}">${username}</a>
-        <div>${p.content}</div>
+        <div class="post-header">
+          <a href="profile.html?u=${encodeURIComponent(username)}">${username}</a>
+        </div>
+        <div class="post-content">${p.content}</div>
+        <div class="post-date">${new Date(p.created_at).toLocaleDateString()}</div>
+        <div class="post-actions">
+          <button class="post-action-btn like-btn ${likeData.liked ? 'liked' : ''}" data-statement-id="${p.id}">
+            ♥ ${likeData.count}
+          </button>
+          <button class="post-action-btn comment-btn" data-statement-id="${p.id}">
+            💬 ${commentCount}
+          </button>
+        </div>
       `;
+
+      el.querySelector(".like-btn").onclick = (e) => {
+        e.preventDefault();
+        toggleLike(p.id);
+      };
+
+      el.querySelector(".comment-btn").onclick = (e) => {
+        e.preventDefault();
+        openComments(p.id);
+      };
+
       feedEl.appendChild(el);
     });
   }

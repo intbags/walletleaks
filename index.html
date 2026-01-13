@@ -20,22 +20,21 @@
 
     <header class="top">
       <div class="logo">—</div>
+      <button id="connectBtn">Login</button>
     </header>
 
-    <section class="hero">
+    <section class="hero" id="heroSection">
       <h1>
         say one thing<br/>
         as your wallet
       </h1>
       <p>
-        no followers. no likes.<br/>
-        just a public statement tied to your on-chain identity.
+        meet people. share your thoughts.<br/>
+        everything is tied to your on-chain identity.
       </p>
     </section>
 
-    <section class="card">
-      <button id="connectBtn">connect wallet</button>
-
+    <section class="card" id="publishCard">
       <textarea
         id="statementInput"
         placeholder="write one sentence you stand by"
@@ -43,7 +42,7 @@
       ></textarea>
 
       <button id="publishBtn" class="disabled">
-        publish statement
+        Publish
       </button>
 
       <div id="status" class="status"></div>
@@ -64,6 +63,21 @@
       <input id="modalUsernameInput" placeholder="@username" maxlength="15" />
       <div id="usernameStatus" class="status"></div>
       <button id="confirmUsernameBtn" class="disabled">confirm</button>
+    </div>
+  </div>
+
+  <!-- COMMENTS MODAL -->
+  <div id="commentsModal" class="modal hidden">
+    <div class="modal-card comments-modal">
+      <div class="comments-header">
+        <h2>Replies</h2>
+        <button class="close-btn" id="closeCommentsBtn">✕</button>
+      </div>
+      <div class="comments-container" id="commentsContainer"></div>
+      <div class="comment-input-wrapper">
+        <textarea id="commentInput" placeholder="write a reply..." maxlength="280"></textarea>
+        <button id="submitCommentBtn">Reply</button>
+      </div>
     </div>
   </div>
 

@@ -18,7 +18,14 @@ async function init() {
   document.getElementById("username").innerText = username;
 
   if (window.solana && window.solana.isConnected) {
-    currentWallet = window.solana.publicKey.toString();
+    try {
+      const accounts = await window.solana.request({ method: "getAccounts" });
+      if (accounts && accounts.length > 0) {
+        currentWallet = accounts[0].address;
+      }
+    } catch (e) {
+      console.log("wallet not connected yet");
+    }
   }
 
   loadProfile();
@@ -59,7 +66,7 @@ async function loadProfile() {
 
   const followBtn = document.getElementById("followBtn");
 
-  if (currentWallet === profileWallet) {
+  if (currentWallet && currentWallet === profileWallet) {
     followBtn.style.display = "none";
   } else if (currentWallet) {
     const { data: existingFollow } = await supabase
@@ -104,10 +111,14 @@ async function loadProfile() {
 
 document.getElementById("followBtn").onclick = async () => {
   if (!currentWallet) {
-    if (window.solana) {
-      const res = await window.solana.connect();
-      currentWallet = res.publicKey.toString();
-      loadProfile();
+    if (window.solana && window.solana.isPhantom) {
+      try {
+        const res = await window.solana.connect();
+        currentWallet = res.publicKey.toString();
+        loadProfile();
+      } catch (e) {
+        alert("failed to connect wallet");
+      }
     } else {
       alert("phantom wallet required");
     }
