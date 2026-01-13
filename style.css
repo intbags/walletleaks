@@ -1,5 +1,5 @@
 /* =========================
-   THEME (BAGS INSPIRED)
+   THEME (BAGS)
 ========================= */
 
 :root {
@@ -9,17 +9,17 @@
 
   --text: #ffffff;
   --text-muted: #a1a1aa;
-  --text-soft: #d1d5db;
+  --text-soft: #e5e7eb;
 
   --accent: #02ff40;
-  --accent-glow: rgba(2, 255, 64, 0.35);
+  --accent-glow: rgba(2,255,64,0.35);
 
   --border: rgba(255,255,255,0.08);
   --border-soft: rgba(255,255,255,0.05);
 }
 
 /* =========================
-   RESET
+   BASE
 ========================= */
 
 * {
@@ -31,7 +31,7 @@ html, body {
   padding: 0;
   background: var(--bg);
   color: var(--text);
-  font-family: Inter, system-ui, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, "Inter", system-ui, sans-serif;
 }
 
 /* =========================
@@ -47,7 +47,7 @@ html, body {
 }
 
 /* =========================
-   APP LAYOUT
+   APP
 ========================= */
 
 .app {
@@ -74,7 +74,7 @@ html, body {
 }
 
 /* =========================
-   BUTTONS
+   BUTTONS (BASE)
 ========================= */
 
 button {
@@ -88,7 +88,6 @@ button {
 
 button:hover:not(.disabled) {
   transform: translateY(-1px);
-  box-shadow: 0 0 32px var(--accent-glow);
 }
 
 button.disabled {
@@ -96,16 +95,17 @@ button.disabled {
   pointer-events: none;
 }
 
-/* Primary buttons */
+/* =========================
+   CONNECT / PUBLISH
+========================= */
 
-#connectBtn,
-#publishBtn,
-#submitCommentBtn,
-#followBtn {
+#connectBtn {
   background: var(--accent);
   color: #000;
-  box-shadow: 0 0 24px var(--accent-glow);
   font-size: 13px;
+  padding: 10px 18px;
+  margin-left: auto;
+  box-shadow: 0 0 24px var(--accent-glow);
 }
 
 #connectBtn.disabled {
@@ -113,18 +113,10 @@ button.disabled {
   pointer-events: none;
 }
 
-/* Follow states */
-
-#followBtn.following {
-  background: transparent;
-  color: var(--text-muted);
-  border: 1px solid var(--border);
-  box-shadow: none;
-}
-
-#followBtn.following:hover {
-  border-color: var(--accent);
-  color: var(--accent);
+#publishBtn {
+  background: var(--accent);
+  color: #000;
+  box-shadow: 0 0 24px var(--accent-glow);
 }
 
 /* =========================
@@ -134,6 +126,7 @@ button.disabled {
 .hero {
   text-align: center;
   margin-bottom: 60px;
+  transition: all 0.3s ease;
 }
 
 .hero.hidden {
@@ -153,8 +146,17 @@ button.disabled {
 }
 
 /* =========================
-   CARDS
+   PUBLISH CARD
 ========================= */
+
+#publishCard {
+  margin-bottom: 40px;
+  transition: all 0.3s ease;
+}
+
+#publishCard.hidden {
+  display: none;
+}
 
 .card {
   width: 100%;
@@ -166,10 +168,6 @@ button.disabled {
   display: flex;
   flex-direction: column;
   gap: 16px;
-}
-
-#publishCard.hidden {
-  display: none;
 }
 
 /* =========================
@@ -222,7 +220,7 @@ footer {
 }
 
 /* =========================
-   FEED / POSTS
+   FEED
 ========================= */
 
 .feed {
@@ -293,7 +291,6 @@ footer {
   padding: 4px 0;
   cursor: pointer;
   font-size: 12px;
-  transition: color 0.2s ease;
 }
 
 .post-action-btn:hover {
@@ -305,25 +302,13 @@ footer {
 }
 
 /* =========================
-   EMPTY STATES
-========================= */
-
-.empty-state,
-.empty-comments {
-  text-align: center;
-  padding: 40px 20px;
-  color: var(--text-muted);
-  font-size: 14px;
-}
-
-/* =========================
-   MODALS
+   MODAL
 ========================= */
 
 .modal {
   position: fixed;
   inset: 0;
-  background: rgba(0,0,0,0.7);
+  background: rgba(0,0,0,0.6);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -348,85 +333,59 @@ footer {
   margin-bottom: 12px;
 }
 
+.modal-card input {
+  background: var(--bg-input);
+  border: 1px solid var(--border-soft);
+  color: var(--text);
+}
+
+.modal-card button {
+  width: 100%;
+  margin-top: 14px;
+  background: var(--accent);
+  color: #000;
+  box-shadow: 0 0 20px var(--accent-glow);
+}
+
 /* =========================
    COMMENTS
 ========================= */
 
-.comments-modal {
-  width: 90%;
-  max-width: 500px;
-  max-height: 80vh;
-  display: flex;
-  flex-direction: column;
-  padding: 0;
-}
-
-.comments-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 20px 24px;
-  border-bottom: 1px solid var(--border);
-}
-
 .close-btn {
-  background: none;
-  border: none;
   color: var(--text-muted);
-  font-size: 20px;
-  cursor: pointer;
 }
 
 .close-btn:hover {
   color: var(--text);
 }
 
-.comment {
-  padding: 12px 0;
-  border-bottom: 1px solid var(--border-soft);
-}
-
-.comment-author {
-  font-size: 12px;
+.comment-author,
+.comment-date {
   color: var(--text-muted);
 }
 
 .comment-text {
-  font-size: 13px;
   color: var(--text-soft);
 }
 
-.comment-date {
-  font-size: 11px;
-  color: var(--text-muted);
-}
-
 /* =========================
-   PROFILE
+   FOLLOW
 ========================= */
 
-.profile-page {
-  max-width: 700px;
+#submitCommentBtn,
+#followBtn {
+  background: var(--accent);
+  color: #000;
+  box-shadow: 0 0 20px var(--accent-glow);
 }
 
-.profile-info h1 {
-  font-size: 32px;
-  margin-bottom: 20px;
-}
-
-.profile-stats {
-  display: flex;
-  gap: 40px;
-  justify-content: center;
-}
-
-.stat-value {
-  font-size: 24px;
-  font-weight: 600;
-}
-
-.stat-label {
-  font-size: 12px;
+#followBtn.following {
+  background: transparent;
   color: var(--text-muted);
-  text-transform: uppercase;
+  border: 1px solid var(--border);
+}
+
+#followBtn.following:hover {
+  border-color: var(--accent);
+  color: var(--accent);
 }
