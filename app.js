@@ -1,8 +1,8 @@
 document.addEventListener("DOMContentLoaded", () => {
 
 const supabase = window.supabase.createClient(
-  "https://TON_PROJET.supabase.co",
-  "TON_ANON_KEY"
+  "https://zzxqftnarcpjkqiztuof.supabase.co",
+  "sb_publishable_T76EtSvgz5oMzg2zW2cGkA_I1fX3DIO"
 );
 
 let wallet = null;
